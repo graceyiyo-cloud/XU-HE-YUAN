@@ -1408,7 +1408,7 @@
       const currentColumns = useMemo(() => {
         if (combinedData.length === 0) return [];
         const cols = new Set();
-        const hiddenColumns = new Set(['發票寄送', '寄', '10F']);
+        const hiddenColumns = new Set(['通知寄紙本', '發票寄送', '寄', '10F']);
         combinedData.forEach(row => { Object.keys(row).forEach(k => { if(k !== '_isCustom' && !k.startsWith('__EMPTY') && !hiddenColumns.has(k)) cols.add(k); }); });
         return Array.from(cols).sort((a, b) => {
           const idxA = MASTER_COLUMN_ORDER.indexOf(a), idxB = MASTER_COLUMN_ORDER.indexOf(b);
