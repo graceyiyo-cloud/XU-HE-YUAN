@@ -815,6 +815,127 @@
         };
         reader.readAsArrayBuffer(file);
       };
+
+      const handleInvoiceFileUpload = (e) => {
+        if (!isAdmin) return;
+        const file = e.target.files[0]; if (!file) return;
+        const reader = new FileReader();
+        reader.onload = async (evt) => {
+          try {
+            const wb = window.XLSX.read(evt.target.result, { type: 'array', cellDates: true });
+            const parsedRows = [];
+            const invalidRows = [];
+
+            wb.SheetNames.forEach(sheetName => {
+              const grid = window.XLSX.utils.sheet_to_json(wb.Sheets[sheetName], { header: 1, defval: '', raw: false });
+              const headerIndex = grid.findIndex(row => row.some(v => normStr(v) === '戶別') && row.some(v => normStr(v).includes('發票號碼')));
+              if (headerIndex < 0) return;
+
+              const headers = grid[headerIndex].map(v => normStr(v));
+              const unitIndex = headers.findIndex(v => v === '戶別');
+              const dateIndex = headers.findIndex(v => v.includes('日期'));
+              const invoiceIndex = headers.findIndex(v => v.includes('發票號碼'));
+              const amountIndex = headers.findIndex(v => v === '金額' || v.includes('金額'));
+              const stageIndex = headers.findIndex(v => v.includes('期款名稱'));
+              const sourceIndex = headers.findIndex(v => v.includes('來源檔案'));
+
+              grid.slice(headerIndex + 1).forEach((row, rowOffset) => {
+                const unitRaw = normStr(row[unitIndex]);
+                const invoiceNo = normStr(row[invoiceIndex]).replace(/\s+/g, '');
+                if (!unitRaw && !invoiceNo) return;
+                const unitMatch = unitRaw.match(/^(\d+)\s*([A-Z]\d+)$/i);
+                const amount = parseFloat(String(row[amountIndex] || '').replace(/,/g, '')) || 0;
+                const remittanceDate = convertToMinguo(String(row[dateIndex] || '').trim());
+
+                if (!unitMatch || !invoiceNo || !remittanceDate || amount <= 0) {
+                  invalidRows.push(`${sheetName} 第 ${headerIndex + rowOffset + 2} 列`);
+                  return;
+                }
+
+                parsedRows.push({
+                  floor: unitMatch[1],
+                  unit: unitMatch[2].toUpperCase(),
+                  invoiceNo,
+                  amount,
+                  remittanceDate,
+                  stageName: normStr(row[stageIndex]) || '期款',
+                  sourceFile: String(row[sourceIndex] || '').trim()
+                });
+              });
+            });
+
+            if (!user || parsedRows.length === 0) throw new Error('找不到「戶別、日期、發票號碼、金額」完整的發票資料');
+            if (invalidRows.length > 0) throw new Error(`有 ${invalidRows.length} 列資料不完整：${invalidRows.slice(0, 5).join('、')}`);
+
+            const invoiceNumbers = new Set();
+            const duplicateNumbers = [];
+            parsedRows.forEach(row => {
+              if (invoiceNumbers.has(row.invoiceNo)) duplicateNumbers.push(row.invoiceNo);
+              invoiceNumbers.add(row.invoiceNo);
+            });
+            if (duplicateNumbers.length > 0) throw new Error(`發票號碼重複：${[...new Set(duplicateNumbers)].join('、')}`);
+
+            const existingRemittances = new Map((customData.remittances || []).map(row => [row.id, row]));
+            const existingChanges = new Map((customData.customChanges || []).map(row => [row.id, row]));
+            const updatedInvoices = { ...firebaseInvoices };
+            let customChangeCount = 0;
+
+            parsedRows.forEach(row => {
+              const id = `invoice_${row.invoiceNo.replace(/[^A-Z0-9_-]/g, '_')}`;
+              const unitKey = `${row.floor}_${row.unit}`;
+              existingRemittances.set(id, {
+                ...(existingRemittances.get(id) || {}),
+                unitKey,
+                匯款日期: row.remittanceDate,
+                匯款金額: row.amount,
+                期款名稱: row.stageName,
+                來源檔案: row.sourceFile,
+                _isCustom: true,
+                _invoiceImport: true,
+                id
+              });
+              updatedInvoices[id] = {
+                ...(updatedInvoices[id] || {}),
+                發票日期: row.remittanceDate,
+                發票號碼: row.invoiceNo
+              };
+
+              if (row.stageName.includes('客變')) {
+                existingChanges.set(id, {
+                  ...(existingChanges.get(id) || {}),
+                  unitKey,
+                  日期: row.remittanceDate,
+                  備註: '客變',
+                  客變金額: row.amount,
+                  來源檔案: row.sourceFile,
+                  _invoiceImport: true,
+                  id
+                });
+                customChangeCount++;
+              }
+            });
+
+            const summary = `發票 ${parsedRows.length} 筆\n其中客變 ${customChangeCount} 筆\n發票日期與匯款日期皆使用清單日期`;
+            if (!window.confirm(`準備匯入「${file.name}」：\n\n${summary}\n\n相同發票號碼會更新，不會重複新增。是否繼續？`)) return;
+
+            setCloudStatus('syncing');
+            await setDoc(doc(db, 'artifacts', appId, 'public', 'data', 'custom', dataIds.additions), {
+              remittances: [...existingRemittances.values()],
+              customChanges: [...existingChanges.values()]
+            }, { merge: true });
+            await setDoc(doc(db, 'artifacts', appId, 'public', 'data', 'invoices', dataIds.invoices), updatedInvoices);
+            setFirebaseInvoices(updatedInvoices);
+            alert(`發票資料匯入完成：\n${summary}`);
+          } catch (error) {
+            console.error(error);
+            alert(`發票匯入失敗：${error.message}`);
+            setCloudStatus('synced');
+          } finally {
+            e.target.value = '';
+          }
+        };
+        reader.readAsArrayBuffer(file);
+      };
       const projectStats = useMemo(() => {
         let totalSales = 0, totalReceived = 0, soldCount = 0, totalUnitsCount = 0, handedOverCount = 0;
         const salesTabKey = Object.keys(sheetsData).find(k => k.includes('收款總表'));
@@ -1757,6 +1878,7 @@
                   <button onClick={() => setShowBackupModal(true)} className="bg-white border border-indigo-500 text-indigo-500 px-3 py-1.5 rounded-full text-[11px] font-bold hover:bg-indigo-500 hover:text-white flex items-center gap-1 shadow-sm transition-all"><Database size={12} />備份還原</button>
                   <button onClick={() => setShowAuthModal(true)} className="bg-white border border-[#8C9B90] text-[#8C9B90] px-3 py-1.5 rounded-full text-[11px] font-bold hover:bg-[#8C9B90] hover:text-white flex items-center gap-1 shadow-sm transition-all"><ShieldAlert size={12} />權限管理</button>
                   <button onClick={() => setShowAddUnitModal(true)} className="bg-white border border-[#8C9B90] text-[#8C9B90] px-3 py-1.5 rounded-full text-[11px] font-bold hover:bg-[#8C9B90] hover:text-white flex items-center gap-1 shadow-sm transition-all"><Plus size={12} />雲端新增</button>
+                  <label className="cursor-pointer bg-white border border-amber-600 text-amber-700 px-3 py-1.5 rounded-full text-[11px] font-bold flex items-center gap-1 shadow-sm hover:bg-amber-50 transition-all"><FileText size={12} />匯入發票<input type="file" accept=".xlsx, .xls, .csv" className="hidden" onChange={handleInvoiceFileUpload} /></label>
                   <label className="cursor-pointer bg-[#8C9B90] text-white px-3 py-1.5 rounded-full text-[11px] font-bold flex items-center gap-1 shadow-sm hover:bg-[#7A8A7E] transition-all"><Upload size={12} /> 匯入 Excel<input type="file" accept=".xlsx, .xls, .csv" className="hidden" onChange={handleFileUpload} /></label>
                 </>
               )}
