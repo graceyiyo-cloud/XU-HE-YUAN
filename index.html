@@ -2174,15 +2174,18 @@
                     <h3 className="text-sm font-bold text-[#8C9B90] mb-4 border-b pb-2 flex items-center gap-2"><User size={16}/>聯絡資料</h3>
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-x-10 gap-y-3">
                       {(() => {
-                        const items = { ...selectedUnit.客戶資料 }; const zip = items['郵遞區號'] || '', addr = items['通訊地址'] || '';
+                        const items = { ...selectedUnit.客戶資料 };
+                        const phone = items['手機'] || '', zip = items['郵遞區號'] || '', addr = items['通訊地址'] || '', note = items['備註'] || '';
                         const staticFields = ['樓層','編號','買方'];
-                        const fields = Object.entries(items).filter(([k,v]) => !staticFields.includes(normStr(k)) && !k.startsWith('__EMPTY') && !['郵遞區號','通訊地址'].includes(k) && (isEditingMode || (v && String(v).trim() !== ""))).map(([k,v])=>(
+                        const fields = Object.entries(items).filter(([k,v]) => !staticFields.includes(normStr(k)) && !k.startsWith('__EMPTY') && !['手機','郵遞區號','通訊地址','備註'].includes(k) && (isEditingMode || (v && String(v).trim() !== ""))).map(([k,v])=>(
                           <div key={k} className="flex justify-between items-center text-sm border-b border-gray-50 pb-2 px-3"><span className="text-gray-400">{k}</span>{isEditingMode ? <input className="border px-2 py-1 rounded text-center w-2/3" value={v} onChange={e=>{ const newCust = {...selectedUnit.客戶資料, [k]: e.target.value}; setSelectedUnit({...selectedUnit, 客戶資料: newCust}); }}/> : <span className={`font-medium whitespace-pre-wrap ${getAlignClass(k, v)}`}>{renderDateIfApplicable(k,v)}</span>}</div>
                         ));
-                        if (isEditingMode || zip || addr) {
-                          fields.push(<div key="merged" className="flex justify-between items-center text-sm border-b border-gray-50 pb-2 px-3 md:col-span-1"><span className="text-gray-400">通訊地址</span>{isEditingMode ? <div className="flex gap-1 w-2/3"><input className="border px-2 py-1 rounded w-1/4 text-center" placeholder="郵編" value={zip} onChange={e=>setSelectedUnit({...selectedUnit, 客戶資料:{...selectedUnit.客戶資料, 郵遞區號:e.target.value}})}/><input className="border px-2 py-1 rounded flex-1" placeholder="地址" value={addr} onChange={e=>setSelectedUnit({...selectedUnit, 客戶資料:{...selectedUnit.客戶資料, 通訊地址:e.target.value}})}/></div> : <span className="font-medium text-center whitespace-pre-wrap">{zip?`[${zip}] `:''}{addr}</span>}</div>);
-                        }
-                        return fields;
+                        return <>
+                          {(isEditingMode || phone) && <div className="grid grid-cols-[4rem_minmax(0,1fr)] items-start gap-3 text-sm border-b border-gray-50 pb-2 px-3"><span className="text-gray-400">手機</span>{isEditingMode ? <input className="border px-2 py-1 rounded w-full text-left" value={phone} onChange={e=>setSelectedUnit({...selectedUnit, 客戶資料:{...selectedUnit.客戶資料, 手機:e.target.value}})}/> : <span className="font-medium text-left whitespace-pre-wrap break-words">{renderDateIfApplicable('手機', phone)}</span>}</div>}
+                          {(isEditingMode || zip || addr) && <div className="grid grid-cols-[4rem_minmax(0,1fr)] items-start gap-3 text-sm border-b border-gray-50 pb-2 px-3"><span className="text-gray-400">通訊地址</span>{isEditingMode ? <div className="grid grid-cols-[5rem_minmax(0,1fr)] gap-1"><input className="border px-2 py-1 rounded text-center" placeholder="郵編" value={zip} onChange={e=>setSelectedUnit({...selectedUnit, 客戶資料:{...selectedUnit.客戶資料, 郵遞區號:e.target.value}})}/><input className="border px-2 py-1 rounded min-w-0" placeholder="地址" value={addr} onChange={e=>setSelectedUnit({...selectedUnit, 客戶資料:{...selectedUnit.客戶資料, 通訊地址:e.target.value}})}/></div> : <span className="font-medium text-left whitespace-pre-wrap break-words">{zip?`[${zip}] `:''}{addr}</span>}</div>}
+                          {(isEditingMode || note) && <div className="grid grid-cols-[4rem_minmax(0,1fr)] items-start gap-3 text-sm border-b border-gray-50 pb-2 px-3 md:col-span-2"><span className="text-gray-400">備註</span>{isEditingMode ? <textarea className="border px-2 py-1 rounded w-full min-h-16 resize-y" value={note} onChange={e=>setSelectedUnit({...selectedUnit, 客戶資料:{...selectedUnit.客戶資料, 備註:e.target.value}})}/> : <span className="font-medium text-left whitespace-pre-wrap break-words">{note}</span>}</div>}
+                          {fields}
+                        </>;
                       })()}
                     </div>
                   </div>
