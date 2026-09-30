@@ -1871,7 +1871,7 @@
       }
 
       return (
-        <div className="min-h-screen bg-[#F5F5F0] text-[#4A4A4A] pb-10 font-sans">
+        <div className="min-h-screen bg-[#F5F5F0] text-[#4A4A4A] pb-1 font-sans">
           <header className="bg-white shadow-sm border-b sticky top-0 z-[60] px-4 py-3 flex justify-between items-center">
             <div className="flex items-center gap-4">
               <div className="flex items-center gap-2"><div className="bg-[#8C9B90] p-1.5 rounded-lg text-white"><Home size={20} /></div><h1 className="text-lg font-bold">敘禾苑系統</h1></div>
@@ -1929,7 +1929,7 @@
             </div>
           )}
 
-          <div className="max-w-full mx-auto px-6 py-4">
+          <div className="max-w-full mx-auto px-6 pt-4 pb-0">
             <div className="flex flex-wrap gap-4 mb-4">
               <div className="flex w-fit flex-wrap gap-x-6 gap-y-3 bg-white px-5 py-4 rounded-2xl shadow-sm border border-[#D4C9B9]/30">
                 <div className="flex items-center gap-2"><TrendingUp size={16} className="text-[#8C9B90]"/><div className="flex flex-col"><span className="text-[10px] text-gray-400 font-bold">總成交額</span><span className="font-bold text-base">{projectStats.total.toLocaleString()}</span></div></div>
@@ -1981,7 +1981,7 @@
             </div>
             
             <div className="bg-white rounded-xl shadow-sm border overflow-hidden border-[#D4C9B9]/20 relative">
-              <div className="overflow-auto max-h-[65vh] scrollbar-hide">
+              <div className="overflow-auto scrollbar-hide" style={{ maxHeight: 'calc(100dvh - 12.75rem)' }}>
                 {activeTab === "待開發票清單" ? (
                   <table className="w-full text-left border-collapse">
                     <thead className="sticky top-0 z-40 bg-[#F9F9F8] text-[10px] font-bold text-gray-500">
