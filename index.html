@@ -97,6 +97,13 @@
       '讓渡日期', '戶名', '姓名', '讓渡總價', '合約總價', '換約手續費0.1%', '發票號碼', '新戶'
     ];
 
+    const COLUMN_DISPLAY_LABELS = {
+      '應付簽約金': '應付簽約金5%',
+      '應付使照': '應付使照15%',
+      '應付銀貸': '應付銀貸75%',
+      '應付交屋': '應付交屋5%'
+    };
+
     const normStr = (s) => String(s || '').trim().toUpperCase().replace(/\.0$/, '');
 
     // 敘禾苑門牌尚未提供，避免沿用青森苑的固定地址。
@@ -2057,7 +2064,7 @@
                           const isSticky = ['樓層', '編號', '買方', '成交總價'].includes(c);
                           const leftPos = c==='樓層'?'44px':c==='編號'?'89px':c==='買方'?'134px':c==='成交總價'?'244px':'0px';
                           const colClass = c==='樓層'?'col-floor':c==='編號'?'col-unit':c==='買方'?'col-buyer':c==='成交總價'?'col-total':'';
-                          return <th key={i} className={`px-2 py-3 border-b text-center ${colClass} ${isSticky ? 'sticky z-50 bg-[#F9F9F8] border-r sticky-shadow' : ''}`} style={isSticky?{left:leftPos}:{}}>{c}</th>
+                          return <th key={i} className={`px-2 py-3 border-b text-center ${colClass} ${isSticky ? 'sticky z-50 bg-[#F9F9F8] border-r sticky-shadow' : ''}`} style={isSticky?{left:leftPos}:{}}>{COLUMN_DISPLAY_LABELS[c] || c}</th>
                         })}
                       </tr>
                     </thead>
