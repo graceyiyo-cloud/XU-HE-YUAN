@@ -78,7 +78,16 @@
     const auth = getAuth(app);
     const db = getFirestore(app);
     const provider = new GoogleAuthProvider();
-    const appId = typeof window !== 'undefined' && window.__app_id ? window.__app_id : 'xuheyuan-admin';
+    // Firestore rules authorize this existing top-level namespace. XU-HE-YUAN
+    // stays isolated through dedicated document IDs inside the allowed collections.
+    const appId = typeof window !== 'undefined' && window.__app_id ? window.__app_id : 'qingsenyuan-admin';
+    const dataIds = {
+      invoices: 'xuheyuan_all_invoices',
+      additions: 'xuheyuan_additions',
+      archived: 'xuheyuan_archived',
+      loginLogs: 'xuheyuan_login_logs',
+      masterSheets: 'xuheyuan_all_sheets'
+    };
     const initialAuthToken = typeof window !== 'undefined' && window.__initial_auth_token ? window.__initial_auth_token : null;
 
     const MASTER_COLUMN_ORDER = [
@@ -551,7 +560,7 @@
             setUser(u); setAuthError(""); 
             if (u.email && u.email !== ADMIN_EMAIL) {
                 const emailKey = u.email.replace(/\./g, '_');
-                setDoc(doc(db, 'artifacts', appId, 'public', 'data', 'custom', 'login_logs'), {
+                setDoc(doc(db, 'artifacts', appId, 'public', 'data', 'custom', dataIds.loginLogs), {
                     [emailKey]: {
                         email: u.email,
                         lastLogin: new Date().toISOString(),
@@ -594,27 +603,23 @@
             ? "目前帳號沒有讀取敘禾苑資料的權限，請使用管理員帳號登入。"
             : "無法載入雲端資料，請檢查網路後重新整理。");
         };
-        const unsubInv = onSnapshot(doc(db, 'artifacts', appId, 'public', 'data', 'invoices', 'all_invoices'), (s) => { if (s.exists()) setFirebaseInvoices(s.data()); }, error => handleOptionalSnapshotError('Invoices', error));
-        const unsubCustom = onSnapshot(doc(db, 'artifacts', appId, 'public', 'data', 'custom', 'additions'), (s) => { 
+        const unsubInv = onSnapshot(doc(db, 'artifacts', appId, 'public', 'data', 'invoices', dataIds.invoices), (s) => { if (s.exists()) setFirebaseInvoices(s.data()); }, error => handleOptionalSnapshotError('Invoices', error));
+        const unsubCustom = onSnapshot(doc(db, 'artifacts', appId, 'public', 'data', 'custom', dataIds.additions), (s) => {
             const data = s.exists() ? s.data() : {};
             setCustomData(data); 
         }, error => handleOptionalSnapshotError('Custom data', error));
-        const unsubArchived = onSnapshot(doc(db, 'artifacts', appId, 'public', 'data', 'custom', 'archived'), (s) => {
+        const unsubArchived = onSnapshot(doc(db, 'artifacts', appId, 'public', 'data', 'custom', dataIds.archived), (s) => {
             if (s.exists()) { setArchivedRemittances(s.data().remittances || []); } else { setArchivedRemittances([]); }
         }, error => handleOptionalSnapshotError('Archived data', error));
-        const unsubLogs = onSnapshot(doc(db, 'artifacts', appId, 'public', 'data', 'custom', 'login_logs'), (s) => {
+        const unsubLogs = onSnapshot(doc(db, 'artifacts', appId, 'public', 'data', 'custom', dataIds.loginLogs), (s) => {
             if (s.exists()) { setLoginLogs(s.data()); } else { setLoginLogs({}); }
         }, error => handleOptionalSnapshotError('Login logs', error));
-        const unsubMaster = onSnapshot(collection(db, 'artifacts', appId, 'public', 'data', 'master_sheets'), (snapshot) => {
+        const unsubMaster = onSnapshot(doc(db, 'artifacts', appId, 'public', 'data', 'master_sheets', dataIds.masterSheets), (snapshot) => {
           masterResolved = true;
           window.clearTimeout(cloudTimeout);
           setCloudError("");
-          if (!snapshot.empty) {
-            const newSheets = {};
-            snapshot.forEach(docSnap => { 
-              if (docSnap.id.match(/坪數/) || (docSnap.id.match(/車位/) && !docSnap.id.match(/預收款/))) return;
-              newSheets[docSnap.id] = docSnap.data().rows || []; 
-            });
+          if (snapshot.exists()) {
+            const newSheets = snapshot.data().sheets || {};
             setSheetsData(newSheets);
             setCloudStatus("synced");
             const sortedKeys = Object.keys(newSheets)
@@ -692,23 +697,16 @@
             setCloudStatus("syncing");
             
             if (backup.data.invoices) {
-              await setDoc(doc(db, 'artifacts', appId, 'public', 'data', 'invoices', 'all_invoices'), backup.data.invoices);
+              await setDoc(doc(db, 'artifacts', appId, 'public', 'data', 'invoices', dataIds.invoices), backup.data.invoices);
             }
             if (backup.data.customData) {
-              await setDoc(doc(db, 'artifacts', appId, 'public', 'data', 'custom', 'additions'), backup.data.customData);
+              await setDoc(doc(db, 'artifacts', appId, 'public', 'data', 'custom', dataIds.additions), backup.data.customData);
             }
             if (backup.data.archivedRemittances) {
-              await setDoc(doc(db, 'artifacts', appId, 'public', 'data', 'custom', 'archived'), { remittances: backup.data.archivedRemittances });
+              await setDoc(doc(db, 'artifacts', appId, 'public', 'data', 'custom', dataIds.archived), { remittances: backup.data.archivedRemittances });
             }
             if (backup.data.master_sheets) {
-              const colRef = collection(db, 'artifacts', appId, 'public', 'data', 'master_sheets');
-              const oldDocs = await getDocs(colRef);
-              for (const d of oldDocs.docs) {
-                 await deleteDoc(d.ref);
-              }
-              for (const sheetName of Object.keys(backup.data.master_sheets)) {
-                 await setDoc(doc(db, 'artifacts', appId, 'public', 'data', 'master_sheets', sheetName.replace(/\//g, '_')), { rows: backup.data.master_sheets[sheetName] });
-              }
+              await setDoc(doc(db, 'artifacts', appId, 'public', 'data', 'master_sheets', dataIds.masterSheets), { sheets: backup.data.master_sheets });
             }
             alert("資料還原成功！");
             setShowBackupModal(false);
@@ -805,12 +803,7 @@
             if (!window.confirm(`準備匯入「${file.name}」：\n\n${sheetSummary}\n\n這會取代目前敘禾苑系統的主表資料，是否繼續？`)) return;
 
             setCloudStatus('syncing');
-            const colRef = collection(db, 'artifacts', appId, 'public', 'data', 'master_sheets');
-            const oldDocs = await getDocs(colRef);
-            for (const d of oldDocs.docs) await deleteDoc(d.ref);
-            for (const sheetName of Object.keys(newData)) {
-              await setDoc(doc(db, 'artifacts', appId, 'public', 'data', 'master_sheets', sheetName.replace(/\//g, '_')), { rows: newData[sheetName] });
-            }
+            await setDoc(doc(db, 'artifacts', appId, 'public', 'data', 'master_sheets', dataIds.masterSheets), { sheets: newData });
             alert(`匯入完成：\n${sheetSummary}`);
           } catch (error) {
             console.error(error);
@@ -1367,7 +1360,7 @@
         }
 
         setFirebaseInvoices(updated);
-        await setDoc(doc(db, 'artifacts', appId, 'public', 'data', 'invoices', 'all_invoices'), updated);
+        await setDoc(doc(db, 'artifacts', appId, 'public', 'data', 'invoices', dataIds.invoices), updated);
       };
 
       const handleInvoiceApplyPreOpen = async (rK, dateVal, numVal) => {
@@ -1383,7 +1376,7 @@
         }
 
         setFirebaseInvoices(updated);
-        await setDoc(doc(db, 'artifacts', appId, 'public', 'data', 'invoices', 'all_invoices'), updated);
+        await setDoc(doc(db, 'artifacts', appId, 'public', 'data', 'invoices', dataIds.invoices), updated);
       };
 
       const saveClientEdits = async () => {
@@ -1400,12 +1393,12 @@
                const savedRecord = { ...selectedUnit };
                delete savedRecord._originalArchiveTime;
                updatedCanceled[idx] = savedRecord;
-               await setDoc(doc(db, 'artifacts', appId, 'public', 'data', 'custom', 'additions'), { canceledUnits: updatedCanceled }, { merge: true });
+               await setDoc(doc(db, 'artifacts', appId, 'public', 'data', 'custom', dataIds.additions), { canceledUnits: updatedCanceled }, { merge: true });
            }
         } else {
            const uK = `${selectedUnit.基本資料.樓層}_${selectedUnit.基本資料.編號}`;
            const updatedUnits = { ...customData.units, [uK]: { ...customData.units[uK], 基本資料: selectedUnit.基本資料, 客戶資料: selectedUnit.客戶資料, house: selectedUnit.財務款項.house, land: selectedUnit.財務款項.land } };
-           await setDoc(doc(db, 'artifacts', appId, 'public', 'data', 'custom', 'additions'), { units: updatedUnits }, { merge: true });
+           await setDoc(doc(db, 'artifacts', appId, 'public', 'data', 'custom', dataIds.additions), { units: updatedUnits }, { merge: true });
         }
         setIsEditingMode(false);
       };
@@ -1477,7 +1470,7 @@
 
         const updatedCustomChanges = (customData.customChanges || []).filter(c => c.unitKey !== uK);
 
-        await setDoc(doc(db, 'artifacts', appId, 'public', 'data', 'custom', 'additions'), { 
+        await setDoc(doc(db, 'artifacts', appId, 'public', 'data', 'custom', dataIds.additions), {
             units: updatedUnits,
             remittances: updatedRemittances,
             deletedImportedRemittances: newDeletedImported,
@@ -1896,7 +1889,7 @@
                                <button onClick={async () => {
                                    if (!confirm("確定要刪除這筆解約紀錄嗎？")) return;
                                    const newCanceled = (customData.canceledUnits || []).filter(u => u !== p);
-                                   await setDoc(doc(db, 'artifacts', appId, 'public', 'data', 'custom', 'additions'), { canceledUnits: newCanceled }, { merge: true });
+                                   await setDoc(doc(db, 'artifacts', appId, 'public', 'data', 'custom', dataIds.additions), { canceledUnits: newCanceled }, { merge: true });
                                }} className="text-[9px] bg-red-100 text-red-600 px-2 py-1 rounded-md shadow-sm hover:bg-red-200">刪除</button>
                             </td>
                             <td className="px-4 py-2 text-center text-gray-500">{new Date(p.解約日期).toLocaleDateString()}</td>
@@ -2028,7 +2021,7 @@
                                   const updatedUnitInfo = { ...selectedUnit.基本資料, 優先預收: newVal };
                                   const existingUnitData = customData.units?.[uK] || {};
                                   const updatedUnits = { ...customData.units, [uK]: { ...existingUnitData, 基本資料: updatedUnitInfo } };
-                                  await setDoc(doc(db, 'artifacts', appId, 'public', 'data', 'custom', 'additions'), { units: updatedUnits }, { merge: true });
+                                  await setDoc(doc(db, 'artifacts', appId, 'public', 'data', 'custom', dataIds.additions), { units: updatedUnits }, { merge: true });
                                   setSelectedUnit({ ...selectedUnit, 基本資料: updatedUnitInfo });
                                 }}
                                 className="rounded text-purple-600 focus:ring-purple-500 w-3 h-3 cursor-pointer"
@@ -2370,11 +2363,11 @@
                             const rK = r._id; const cD = firebaseInvoices[rK] || {};
                             const handleDelete = async ()=>{
                                 if(!confirm("確定要刪除這筆匯款紀錄嗎？"))return;
-                                if(r._isImported) await setDoc(doc(db, 'artifacts', appId, 'public', 'data', 'custom', 'additions'), { deletedImportedRemittances: arrayUnion(r._id) }, { merge: true });
+                                if(r._isImported) await setDoc(doc(db, 'artifacts', appId, 'public', 'data', 'custom', dataIds.additions), { deletedImportedRemittances: arrayUnion(r._id) }, { merge: true });
                                 else {
                                     const inArchived = archivedRemittances.some(x => x.id === r.id);
-                                    if (inArchived) { const uA = archivedRemittances.filter(x => x.id !== r.id); await setDoc(doc(db, 'artifacts', appId, 'public', 'data', 'custom', 'archived'), { remittances: uA }, { merge: true }); } 
-                                    else { const uR = (customData.remittances || []).filter(x=>x.id!==r.id); await setDoc(doc(db, 'artifacts', appId, 'public', 'data', 'custom', 'additions'), { remittances: uR }, { merge: true }); }
+                                    if (inArchived) { const uA = archivedRemittances.filter(x => x.id !== r.id); await setDoc(doc(db, 'artifacts', appId, 'public', 'data', 'custom', dataIds.archived), { remittances: uA }, { merge: true }); }
+                                    else { const uR = (customData.remittances || []).filter(x=>x.id!==r.id); await setDoc(doc(db, 'artifacts', appId, 'public', 'data', 'custom', dataIds.additions), { remittances: uR }, { merge: true }); }
                                 }
                                 setSelectedUnit({...selectedUnit, 匯款紀錄: selectedUnit.匯款紀錄.filter(x=>x._id !== r._id)});
                             };
@@ -2436,7 +2429,7 @@
                                 if(remitInput.amt){
                                     const rec = { unitKey:`${selectedUnit.基本資料.樓層}_${selectedUnit.基本資料.編號}`, 匯款日期:convertToMinguo(remitInput.date), 匯款金額:Number(remitInput.amt), _isCustom:true, id:Date.now().toString() };
                                     const newR = [...(customData.remittances || []), rec];
-                                    await setDoc(doc(db,'artifacts',appId,'public', 'data','custom','additions'), { remittances:newR }, { merge:true });
+                                    await setDoc(doc(db,'artifacts',appId,'public', 'data','custom',dataIds.additions), { remittances:newR }, { merge:true });
                                     const updatedList = [...selectedUnit.匯款紀錄, {...rec, _id: rec.id, _isCustom: true}];
                                     updatedList.sort((a, b) => getRecordDateWeight(a) - getRecordDateWeight(b));
                                     setSelectedUnit({...selectedUnit, 匯款紀錄: updatedList});
@@ -2463,7 +2456,7 @@
                           <td className="px-2 py-2.5 text-center font-medium">{r.備註 || '-'}</td>
                           <td className="text-right px-2 font-bold text-purple-700 whitespace-pre-wrap">{Number(r.客變金額).toLocaleString()}</td>
                           <td className="px-2 text-center"><input type="text" disabled={!isAdmin} className="border-none bg-transparent w-full text-xs text-center focus:ring-0 font-mono text-purple-900 placeholder-purple-300" value={cD['發票號碼'] || r['發票號碼'] || ''} onChange={e=>handleInvoiceChange(rK,'發票號碼',e.target.value)} placeholder="號碼"/></td>
-                          {isAdmin && !selectedUnit.isArchived && ( <td className="text-center"><button aria-label="刪除客變項目" onClick={async ()=>{if(!confirm("刪除客變項目？"))return;const uC=(customData.customChanges || []).filter(x=>x.id!==r.id);await setDoc(doc(db,'artifacts',appId,'public', 'data','custom','additions'), { customChanges: uC }, { merge:true });setSelectedUnit({...selectedUnit, 客變紀錄: uC.filter(x=>x.unitKey === `${selectedUnit.基本資料.樓層}_${selectedUnit.基本資料.編號}`)} );}} className="text-red-400 hover:text-red-600 active:scale-95 transition-all"><Trash2 size={14}/></button></td> )}
+                          {isAdmin && !selectedUnit.isArchived && ( <td className="text-center"><button aria-label="刪除客變項目" onClick={async ()=>{if(!confirm("刪除客變項目？"))return;const uC=(customData.customChanges || []).filter(x=>x.id!==r.id);await setDoc(doc(db,'artifacts',appId,'public', 'data','custom',dataIds.additions), { customChanges: uC }, { merge:true });setSelectedUnit({...selectedUnit, 客變紀錄: uC.filter(x=>x.unitKey === `${selectedUnit.基本資料.樓層}_${selectedUnit.基本資料.編號}`)} );}} className="text-red-400 hover:text-red-600 active:scale-95 transition-all"><Trash2 size={14}/></button></td> )}
                         </tr>
                         );
                       })}
@@ -2476,7 +2469,7 @@
                                 if(cbInput.amt){
                                     const rec = { unitKey:`${selectedUnit.基本資料.樓層}_${selectedUnit.基本資料.編號}`, 日期:convertToMinguo(cbInput.date), 備註:cbInput.note, 客變金額:Number(cbInput.amt), id:Date.now().toString() };
                                     const newC = [...(customData.customChanges || []), rec];
-                                    await setDoc(doc(db,'artifacts',appId,'public', 'data','custom','additions'), { customChanges:newC }, { merge:true });
+                                    await setDoc(doc(db,'artifacts',appId,'public', 'data','custom',dataIds.additions), { customChanges:newC }, { merge:true });
                                     setSelectedUnit({...selectedUnit, 客變紀錄: [...selectedUnit.客變紀錄, rec]});
                                     setCbInput({ date: '', note: '', amt: '' });
                                 }
@@ -2498,7 +2491,7 @@
                         const n = document.getElementById('new_auth_name').value.trim(), e = document.getElementById('new_auth_email').value.trim().toLowerCase();
                         if(e && e.includes('@')) { 
                             const newList = [...(customData.allowedViewers || []), { name: n, email: e }]; 
-                            await setDoc(doc(db,'artifacts',appId,'public', 'data','custom','additions'), {allowedViewers: newList}, {merge:true}); 
+                            await setDoc(doc(db,'artifacts',appId,'public', 'data','custom',dataIds.additions), {allowedViewers: newList}, {merge:true});
                             document.getElementById('new_auth_name').value = '';
                             document.getElementById('new_auth_email').value = '';
                         }
@@ -2522,7 +2515,7 @@
                                   <button onClick={async () => {
                                       if(!confirm('確定要移除此權限嗎？')) return;
                                       const newList = (customData.allowedViewers || []).filter((_, idx) => idx !== i);
-                                      await setDoc(doc(db,'artifacts',appId,'public', 'data','custom','additions'), {allowedViewers: newList}, {merge:true});
+                                      await setDoc(doc(db,'artifacts',appId,'public', 'data','custom',dataIds.additions), {allowedViewers: newList}, {merge:true});
                                   }} aria-label={`移除${name}的權限`} className="text-red-400 hover:text-red-600 transition-colors p-2"><Trash2 size={16}/></button>
                               </div>
                           );
@@ -2537,7 +2530,7 @@
           )}
           {showAddUnitModal && isAdmin && <div className="fixed inset-0 z-[100] flex items-center justify-center bg-black/50 backdrop-blur-sm"><div className="bg-white p-8 rounded-3xl w-96 shadow-2xl"><h3 className="font-bold mb-6 text-lg text-[#8C9B90] border-b pb-2 flex items-center gap-2"><Plus size={20}/>建立新成交戶</h3><div className="space-y-4"><input id="new_u_f" className="border w-full p-3 rounded-xl outline-none" placeholder="樓層" /><input id="new_u_u" className="border w-full p-3 rounded-xl outline-none" placeholder="編號" /></div><div className="flex justify-end gap-3 mt-8"><button onClick={() => setShowAddUnitModal(false)} className="px-5 py-2.5 text-gray-400 text-sm">取消</button><button onClick={async () => {
             const f=document.getElementById('new_u_f').value, u=document.getElementById('new_u_u').value;
-            if(f&&u){ const k=`${normStr(f)}_${normStr(u)}`; const cu={...(customData.units || {}), [k]:{ 基本資料:{ 樓層:normStr(f), 編號:normStr(u), 買方: "新客戶" }}}; await setDoc(doc(db,'artifacts',appId,'public', 'data','custom','additions'), {units:cu}, {merge:true}); setShowAddUnitModal(false); }
+            if(f&&u){ const k=`${normStr(f)}_${normStr(u)}`; const cu={...(customData.units || {}), [k]:{ 基本資料:{ 樓層:normStr(f), 編號:normStr(u), 買方: "新客戶" }}}; await setDoc(doc(db,'artifacts',appId,'public', 'data','custom',dataIds.additions), {units:cu}, {merge:true}); setShowAddUnitModal(false); }
           }} className="bg-[#8C9B90] text-white px-8 py-2.5 rounded-xl text-sm font-bold">確認建立</button></div></div></div>}
           {showBackupModal && isAdmin && (
             <div className="fixed inset-0 z-[100] flex items-center justify-center bg-black/50 backdrop-blur-sm p-4">
