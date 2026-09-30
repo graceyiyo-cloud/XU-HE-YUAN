@@ -1095,7 +1095,7 @@
               info.財務款項.house = matches.find(m => Object.values(m).some(v => String(v).includes('房屋'))) || matches[0]; 
               info.財務款項.land = matches.find(m => Object.values(m).some(v => String(v).includes('土地'))) || {}; 
             }
-            else if (sN.match(/客戶|聯絡/)) info.客戶資料 = matches[0];
+            else if (sN.match(/買方|客戶|聯絡/)) info.客戶資料 = matches[0];
           }
         });
         if (customData?.units?.[uK]) { 
