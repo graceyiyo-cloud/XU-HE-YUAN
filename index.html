@@ -607,7 +607,10 @@
         const unsubInv = onSnapshot(doc(db, 'artifacts', appId, 'public', 'data', 'invoices', dataIds.invoices), (s) => { if (s.exists()) setFirebaseInvoices(s.data()); }, error => handleOptionalSnapshotError('Invoices', error));
         const unsubCustom = onSnapshot(doc(db, 'artifacts', appId, 'public', 'data', 'custom', dataIds.additions), (s) => {
             const data = s.exists() ? s.data() : {};
-            setCustomData(data); 
+            setCustomData({
+              units: {}, remittances: [], customChanges: [], deletedImportedRemittances: [],
+              allowedViewers: [], canceledUnits: [], ...data
+            });
         }, error => handleOptionalSnapshotError('Custom data', error));
         const unsubArchived = onSnapshot(doc(db, 'artifacts', appId, 'public', 'data', 'custom', dataIds.archived), (s) => {
             if (s.exists()) { setArchivedRemittances(s.data().remittances || []); } else { setArchivedRemittances([]); }
@@ -1405,7 +1408,8 @@
       const currentColumns = useMemo(() => {
         if (combinedData.length === 0) return [];
         const cols = new Set();
-        combinedData.forEach(row => { Object.keys(row).forEach(k => { if(k !== '_isCustom' && !k.startsWith('__EMPTY')) cols.add(k); }); });
+        const hiddenColumns = new Set(['發票寄送', '寄', '10F']);
+        combinedData.forEach(row => { Object.keys(row).forEach(k => { if(k !== '_isCustom' && !k.startsWith('__EMPTY') && !hiddenColumns.has(k)) cols.add(k); }); });
         return Array.from(cols).sort((a, b) => {
           const idxA = MASTER_COLUMN_ORDER.indexOf(a), idxB = MASTER_COLUMN_ORDER.indexOf(b);
           if (idxA !== -1 && idxB !== -1) return idxA - idxB;
@@ -1504,26 +1508,46 @@
 
       const saveClientEdits = async () => {
         if (!isAdmin || !selectedUnit) return;
-        
-        if (selectedUnit.isArchived) {
-           const updatedCanceled = [...(customData.canceledUnits || [])];
-           const targetId = selectedUnit.archiveId;
-           const targetOriginalTime = selectedUnit._originalArchiveTime || selectedUnit.解約時間;
-           
-           const idx = updatedCanceled.findIndex(u => (u.archiveId && targetId && u.archiveId === targetId) || (!u.archiveId && u.解約時間 === targetOriginalTime && u.基本資料.樓層 === selectedUnit.基本資料.樓層 && u.基本資料.編號 === selectedUnit.基本資料.編號));
-           
-           if (idx > -1) {
-               const savedRecord = { ...selectedUnit };
-               delete savedRecord._originalArchiveTime;
-               updatedCanceled[idx] = savedRecord;
-               await setDoc(doc(db, 'artifacts', appId, 'public', 'data', 'custom', dataIds.additions), { canceledUnits: updatedCanceled }, { merge: true });
-           }
-        } else {
-           const uK = `${selectedUnit.基本資料.樓層}_${selectedUnit.基本資料.編號}`;
-           const updatedUnits = { ...customData.units, [uK]: { ...customData.units[uK], 基本資料: selectedUnit.基本資料, 客戶資料: selectedUnit.客戶資料, house: selectedUnit.財務款項.house, land: selectedUnit.財務款項.land } };
-           await setDoc(doc(db, 'artifacts', appId, 'public', 'data', 'custom', dataIds.additions), { units: updatedUnits }, { merge: true });
+
+        try {
+          setCloudStatus('syncing');
+          if (selectedUnit.isArchived) {
+             const updatedCanceled = [...(customData.canceledUnits || [])];
+             const targetId = selectedUnit.archiveId;
+             const targetOriginalTime = selectedUnit._originalArchiveTime || selectedUnit.解約時間;
+             const idx = updatedCanceled.findIndex(u => (u.archiveId && targetId && u.archiveId === targetId) || (!u.archiveId && u.解約時間 === targetOriginalTime && u.基本資料.樓層 === selectedUnit.基本資料.樓層 && u.基本資料.編號 === selectedUnit.基本資料.編號));
+
+             if (idx > -1) {
+                 const savedRecord = { ...selectedUnit };
+                 delete savedRecord._originalArchiveTime;
+                 updatedCanceled[idx] = savedRecord;
+                 await setDoc(doc(db, 'artifacts', appId, 'public', 'data', 'custom', dataIds.additions), { canceledUnits: updatedCanceled }, { merge: true });
+                 setCustomData(prev => ({ ...prev, canceledUnits: updatedCanceled }));
+             }
+          } else {
+             const uK = `${selectedUnit.基本資料.樓層}_${selectedUnit.基本資料.編號}`;
+             const existingUnits = customData.units || {};
+             const customerData = { ...(selectedUnit.客戶資料 || {}) };
+             const legacyNotice = String(customerData['通知寄紙本'] || '');
+             customerData.通知Line = customerData.通知Line !== undefined ? !!customerData.通知Line : /LINE/i.test(legacyNotice);
+             customerData.通知Mail = customerData.通知Mail !== undefined ? !!customerData.通知Mail : /MAIL|E-MAIL|電子郵件/i.test(legacyNotice);
+             customerData.通知紙本 = customerData.通知紙本 !== undefined ? !!customerData.通知紙本 : (legacyNotice.includes('紙本') && !legacyNotice.includes('不郵寄'));
+             ['通知寄紙本', '發票寄送', '寄', '10F'].forEach(k => delete customerData[k]);
+             const savedUnit = { ...(existingUnits[uK] || {}), 基本資料: selectedUnit.基本資料, 客戶資料: customerData, house: selectedUnit.財務款項.house, land: selectedUnit.財務款項.land };
+             const updatedUnits = { ...existingUnits, [uK]: savedUnit };
+             await setDoc(doc(db, 'artifacts', appId, 'public', 'data', 'custom', dataIds.additions), { units: updatedUnits }, { merge: true });
+             setCustomData(prev => ({ ...prev, units: updatedUnits }));
+             setSelectedUnit(prev => ({ ...prev, 客戶資料: customerData }));
+          }
+          setCloudStatus('synced');
+          setCloudError('');
+          setIsEditingMode(false);
+        } catch (error) {
+          console.error('Save client data failed', error);
+          setCloudStatus('error');
+          setCloudError('資料儲存失敗，請稍後再試。');
+          alert(`儲存失敗：${error.message}`);
         }
-        setIsEditingMode(false);
       };
 
       const handleCancelContract = async () => {
@@ -2144,7 +2168,7 @@
                                   const uK = `${selectedUnit.基本資料.樓層}_${selectedUnit.基本資料.編號}`;
                                   const updatedUnitInfo = { ...selectedUnit.基本資料, 優先預收: newVal };
                                   const existingUnitData = customData.units?.[uK] || {};
-                                  const updatedUnits = { ...customData.units, [uK]: { ...existingUnitData, 基本資料: updatedUnitInfo } };
+                                  const updatedUnits = { ...(customData.units || {}), [uK]: { ...existingUnitData, 基本資料: updatedUnitInfo } };
                                   await setDoc(doc(db, 'artifacts', appId, 'public', 'data', 'custom', dataIds.additions), { units: updatedUnits }, { merge: true });
                                   setSelectedUnit({ ...selectedUnit, 基本資料: updatedUnitInfo });
                                 }}
@@ -2176,14 +2200,21 @@
                       {(() => {
                         const items = { ...selectedUnit.客戶資料 };
                         const phone = items['手機'] || '', zip = items['郵遞區號'] || '', addr = items['通訊地址'] || '', note = items['備註'] || '';
+                        const legacyNotice = String(items['通知寄紙本'] || '');
+                        const noticeLine = items.通知Line !== undefined ? !!items.通知Line : /LINE/i.test(legacyNotice);
+                        const noticeMail = items.通知Mail !== undefined ? !!items.通知Mail : /MAIL|E-MAIL|電子郵件/i.test(legacyNotice);
+                        const noticePaper = items.通知紙本 !== undefined ? !!items.通知紙本 : (legacyNotice.includes('紙本') && !legacyNotice.includes('不郵寄'));
+                        const setNotice = (key, checked) => setSelectedUnit({...selectedUnit, 客戶資料:{...selectedUnit.客戶資料, [key]:checked}});
                         const staticFields = ['樓層','編號','買方'];
-                        const fields = Object.entries(items).filter(([k,v]) => !staticFields.includes(normStr(k)) && !k.startsWith('__EMPTY') && !['手機','郵遞區號','通訊地址','備註'].includes(k) && (isEditingMode || (v && String(v).trim() !== ""))).map(([k,v])=>(
+                        const hiddenContactFields = ['手機','郵遞區號','通訊地址','備註','通知寄紙本','通知Line','通知Mail','通知紙本','發票寄送','寄','10F'];
+                        const fields = Object.entries(items).filter(([k,v]) => !staticFields.includes(normStr(k)) && !k.startsWith('__EMPTY') && !hiddenContactFields.includes(k) && (isEditingMode || (v && String(v).trim() !== ""))).map(([k,v])=>(
                           <div key={k} className="flex justify-between items-center text-sm border-b border-gray-50 pb-2 px-3"><span className="text-gray-400">{k}</span>{isEditingMode ? <input className="border px-2 py-1 rounded text-center w-2/3" value={v} onChange={e=>{ const newCust = {...selectedUnit.客戶資料, [k]: e.target.value}; setSelectedUnit({...selectedUnit, 客戶資料: newCust}); }}/> : <span className={`font-medium whitespace-pre-wrap ${getAlignClass(k, v)}`}>{renderDateIfApplicable(k,v)}</span>}</div>
                         ));
                         return <>
                           {(isEditingMode || phone) && <div className="grid grid-cols-[4rem_minmax(0,1fr)] items-start gap-3 text-sm border-b border-gray-50 pb-2 px-3"><span className="text-gray-400">手機</span>{isEditingMode ? <input className="border px-2 py-1 rounded w-full text-left" value={phone} onChange={e=>setSelectedUnit({...selectedUnit, 客戶資料:{...selectedUnit.客戶資料, 手機:e.target.value}})}/> : <span className="font-medium text-left whitespace-pre-wrap break-words">{renderDateIfApplicable('手機', phone)}</span>}</div>}
                           {(isEditingMode || zip || addr) && <div className="grid grid-cols-[4rem_minmax(0,1fr)] items-start gap-3 text-sm border-b border-gray-50 pb-2 px-3"><span className="text-gray-400">通訊地址</span>{isEditingMode ? <div className="grid grid-cols-[5rem_minmax(0,1fr)] gap-1"><input className="border px-2 py-1 rounded text-center" placeholder="郵編" value={zip} onChange={e=>setSelectedUnit({...selectedUnit, 客戶資料:{...selectedUnit.客戶資料, 郵遞區號:e.target.value}})}/><input className="border px-2 py-1 rounded min-w-0" placeholder="地址" value={addr} onChange={e=>setSelectedUnit({...selectedUnit, 客戶資料:{...selectedUnit.客戶資料, 通訊地址:e.target.value}})}/></div> : <span className="font-medium text-left whitespace-pre-wrap break-words">{zip?`[${zip}] `:''}{addr}</span>}</div>}
                           {(isEditingMode || note) && <div className="grid grid-cols-[4rem_minmax(0,1fr)] items-start gap-3 text-sm border-b border-gray-50 pb-2 px-3 md:col-span-2"><span className="text-gray-400">備註</span>{isEditingMode ? <textarea className="border px-2 py-1 rounded w-full min-h-16 resize-y" value={note} onChange={e=>setSelectedUnit({...selectedUnit, 客戶資料:{...selectedUnit.客戶資料, 備註:e.target.value}})}/> : <span className="font-medium text-left whitespace-pre-wrap break-words">{note}</span>}</div>}
+                          <div className="grid grid-cols-[4rem_minmax(0,1fr)] items-center gap-3 text-sm border-b border-gray-50 pb-2 px-3 md:col-span-2"><span className="text-gray-400">通知方式</span><div className="flex flex-wrap gap-x-6 gap-y-2">{[[ '通知Line', 'Line', noticeLine ], [ '通知Mail', 'Mail', noticeMail ], [ '通知紙本', '紙本', noticePaper ]].map(([key,label,checked]) => <label key={key} className={`flex items-center gap-2 ${isEditingMode ? 'cursor-pointer text-gray-700' : 'text-gray-500'}`}><input type="checkbox" checked={checked} disabled={!isEditingMode} onChange={e=>setNotice(key,e.target.checked)} className="w-4 h-4 rounded border-gray-300 text-[#718079] focus:ring-[#8C9B90]"/><span className="font-medium">{label}</span></label>)}</div></div>
                           {fields}
                         </>;
                       })()}
