@@ -843,6 +843,7 @@
                 const unitRaw = normStr(row[unitIndex]);
                 const invoiceNo = normStr(row[invoiceIndex]).replace(/\s+/g, '');
                 if (!unitRaw && !invoiceNo) return;
+                if (unitRaw.includes('合計')) return;
                 const unitMatch = unitRaw.match(/^(\d+)\s*([A-Z]\d+)$/i);
                 const amount = parseFloat(String(row[amountIndex] || '').replace(/,/g, '')) || 0;
                 const remittanceDate = convertToMinguo(String(row[dateIndex] || '').trim());
