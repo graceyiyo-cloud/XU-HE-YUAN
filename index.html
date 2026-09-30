@@ -117,6 +117,7 @@
       const sVal = String(val).replace(/,/g, '');
       const num = parseFloat(sVal);
       if (isNaN(num) || !/^[0-9.-]+$/.test(sVal)) return val;
+      if (num === 0) return '';
       return num.toLocaleString();
     };
 
@@ -2282,8 +2283,8 @@
                                   ) : (lA ? lA.toLocaleString() : '')}
                                 </td>
                                 <td className="text-right px-2 font-bold">{exp?exp.toLocaleString():''}</td>
-                                <td className="text-right px-2 text-green-600 font-bold">{st.k==='成交'?'':paid.toLocaleString()}</td>
-                                <td className="text-right px-2 text-red-500">{st.k==='成交'?'':(exp-paid).toLocaleString()}</td>
+                                <td className="text-right px-2 text-green-600 font-bold">{st.k==='成交'?'':formatNum(paid)}</td>
+                                <td className="text-right px-2 text-red-500">{st.k==='成交'?'':formatNum(exp-paid)}</td>
                                 <td className="text-center px-2">{st.k==='成交'?'':(paid>=exp?<span className={`px-2.5 py-1 rounded-full text-[10px] font-bold ${st.k==='客變'?'bg-purple-100 text-purple-700':'bg-green-100 text-green-700'}`}>已清</span>:paid>0?<span className="bg-orange-100 text-orange-700 px-2.5 py-1 rounded-full text-[10px] font-bold">未清</span>:<span className="text-gray-300">待付</span>)}</td>
                             </tr>
                           );
