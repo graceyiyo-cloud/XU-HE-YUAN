@@ -114,7 +114,7 @@
 
     const formatNum = (val) => {
       if (val === undefined || val === null || val === '') return '';
-      const sVal = String(val).replace(/,/g, '');
+      const sVal = String(val).replace(/,/g, '').trim();
       const num = parseFloat(sVal);
       if (isNaN(num) || !/^[0-9.-]+$/.test(sVal)) return val;
       if (num === 0) return '';
