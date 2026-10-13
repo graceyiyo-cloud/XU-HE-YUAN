@@ -49,6 +49,11 @@
     
     table { table-layout: auto; border-collapse: separate; border-spacing: 0; }
     th, td { border: 1px solid #E5E7EB; }
+    .site-header { background: #425F76; border-bottom-color: #354E62; }
+    .site-header h1 { color: #FFFFFF; }
+    .site-header > div:first-child > div:first-child > div { background: #607F96; }
+    table thead th { background: #607B90 !important; color: #FFFFFF !important; border-color: #8197A8; }
+    table tfoot td { background: #D5E2EC !important; color: #314E65; border-color: #B9CDDC; }
   </style>
 </head>
 <body class="bg-[#EFF3F6]">
@@ -1872,7 +1877,7 @@
 
       return (
         <div className="min-h-screen bg-[#EFF3F6] text-[#374957] pb-1 font-sans">
-          <header className="bg-white shadow-sm border-b sticky top-0 z-[60] px-4 py-3 flex justify-between items-center">
+          <header className="site-header shadow-sm border-b sticky top-0 z-[60] px-4 py-3 flex justify-between items-center">
             <div className="flex items-center gap-4">
               <div className="flex items-center gap-2"><div className="bg-[#657F94] p-1.5 rounded-lg text-white"><Home size={20} /></div><h1 className="text-lg font-bold">敘禾苑系統</h1></div>
               <div className="flex items-center gap-2 px-3 py-1 bg-gray-50 border rounded-full text-[10px] font-bold text-gray-500 uppercase">
