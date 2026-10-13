@@ -51,7 +51,7 @@
     th, td { border: 1px solid #E5E7EB; }
   </style>
 </head>
-<body class="bg-[#F5F5F0]">
+<body class="bg-[#EFF3F6]">
   <div id="root"></div>
 
   <script type="text/babel" data-type="module">
@@ -1853,15 +1853,15 @@
       };
 
       if (isAuthLoading || (user && cloudStatus === "loading")) {
-        return ( <div className="min-h-screen flex items-center justify-center bg-[#F5F5F0]"><RefreshCw className="animate-spin text-[#8C9B90]" size={32} /></div> );
+        return ( <div className="min-h-screen flex items-center justify-center bg-[#EFF3F6]"><RefreshCw className="animate-spin text-[#657F94]" size={32} /></div> );
       }
 
       if (!user) {
         return (
-          <div className="min-h-screen flex items-center justify-center bg-[#F5F5F0] p-4">
-            <div className="bg-white p-10 rounded-3xl shadow-2xl w-full max-w-md border border-[#D4C9B9]/20 text-center space-y-8">
-              <div className="flex justify-center"><div className="bg-[#8C9B90] p-4 rounded-2xl text-white shadow-lg"><Lock size={40} /></div></div>
-              <div><h1 className="text-2xl font-bold text-[#4A4A4A]">敘禾苑 案場管理系統</h1><p className="text-gray-400 text-sm mt-2 font-medium tracking-wide">請登入帳號以存取後台資料</p></div>
+          <div className="min-h-screen flex items-center justify-center bg-[#EFF3F6] p-4">
+            <div className="bg-white p-10 rounded-3xl shadow-2xl w-full max-w-md border border-[#8496A5]/20 text-center space-y-8">
+              <div className="flex justify-center"><div className="bg-[#657F94] p-4 rounded-2xl text-white shadow-lg"><Lock size={40} /></div></div>
+              <div><h1 className="text-2xl font-bold text-[#374957]">敘禾苑 案場管理系統</h1><p className="text-gray-400 text-sm mt-2 font-medium tracking-wide">請登入帳號以存取後台資料</p></div>
               {authError && <div className="bg-red-50 text-red-600 px-4 py-2 rounded-lg text-xs font-bold">{authError}</div>}
               <button onClick={handleGoogleLogin} className="w-full flex items-center justify-center gap-3 bg-white border border-gray-200 py-3.5 rounded-xl font-bold text-gray-600 hover:bg-gray-50 transition-all shadow-sm active:scale-95"><img src="https://www.gstatic.com/firebasejs/ui/2.0.0/images/auth/google.svg" className="w-5 h-5"/> 使用 Google 帳號登入</button>
               <p className="text-[10px] text-gray-400 tracking-widest font-bold">獨立雲端資料同步</p>
@@ -1871,18 +1871,18 @@
       }
 
       return (
-        <div className="min-h-screen bg-[#F5F5F0] text-[#4A4A4A] pb-1 font-sans">
+        <div className="min-h-screen bg-[#EFF3F6] text-[#374957] pb-1 font-sans">
           <header className="bg-white shadow-sm border-b sticky top-0 z-[60] px-4 py-3 flex justify-between items-center">
             <div className="flex items-center gap-4">
-              <div className="flex items-center gap-2"><div className="bg-[#8C9B90] p-1.5 rounded-lg text-white"><Home size={20} /></div><h1 className="text-lg font-bold">敘禾苑系統</h1></div>
+              <div className="flex items-center gap-2"><div className="bg-[#657F94] p-1.5 rounded-lg text-white"><Home size={20} /></div><h1 className="text-lg font-bold">敘禾苑系統</h1></div>
               <div className="flex items-center gap-2 px-3 py-1 bg-gray-50 border rounded-full text-[10px] font-bold text-gray-500 uppercase">
                 <Database size={12} className={cloudStatus === "synced" ? "text-green-500" : cloudStatus === "error" ? "text-red-500" : "animate-spin text-orange-400"} />
                 {cloudStatus === "synced" ? "雲端已同步" : cloudStatus === "error" ? "雲端連線異常" : "載入中"}
               </div>
             </div>
             <div className="flex items-center gap-3">
-              <div className="flex items-center bg-[#F5F5F0] p-1 rounded-full border border-gray-200 shadow-inner">
-                <button onClick={() => setSearchTerm('')} className={`px-4 py-1.5 rounded-full text-xs font-bold transition-all ${searchTerm === '' ? 'bg-white text-[#8C9B90] shadow-sm' : 'text-gray-400 hover:text-gray-600'}`}>全部</button>
+              <div className="flex items-center bg-[#EFF3F6] p-1 rounded-full border border-gray-200 shadow-inner">
+                <button onClick={() => setSearchTerm('')} className={`px-4 py-1.5 rounded-full text-xs font-bold transition-all ${searchTerm === '' ? 'bg-white text-[#657F94] shadow-sm' : 'text-gray-400 hover:text-gray-600'}`}>全部</button>
                 <button onClick={() => setSearchTerm('客變')} className={`px-4 py-1.5 rounded-full text-xs font-bold transition-all ${searchTerm === '客變' ? 'bg-purple-100 text-purple-700 shadow-sm' : 'text-gray-400 hover:text-gray-600'}`}>客變</button>
                 <button onClick={() => setSearchTerm('換約')} className={`px-4 py-1.5 rounded-full text-xs font-bold transition-all ${searchTerm === '換約' ? 'bg-orange-100 text-orange-600 shadow-sm' : 'text-gray-400 hover:text-gray-600'}`}>換約</button>
               </div>
@@ -1909,10 +1909,10 @@
                       )}
                   </div>
                   <button onClick={() => setShowBackupModal(true)} className="bg-white border border-indigo-500 text-indigo-500 px-3 py-1.5 rounded-full text-[11px] font-bold hover:bg-indigo-500 hover:text-white flex items-center gap-1 shadow-sm transition-all"><Database size={12} />備份還原</button>
-                  <button onClick={() => setShowAuthModal(true)} className="bg-white border border-[#8C9B90] text-[#8C9B90] px-3 py-1.5 rounded-full text-[11px] font-bold hover:bg-[#8C9B90] hover:text-white flex items-center gap-1 shadow-sm transition-all"><ShieldAlert size={12} />權限管理</button>
-                  <button onClick={() => setShowAddUnitModal(true)} className="bg-white border border-[#8C9B90] text-[#8C9B90] px-3 py-1.5 rounded-full text-[11px] font-bold hover:bg-[#8C9B90] hover:text-white flex items-center gap-1 shadow-sm transition-all"><Plus size={12} />雲端新增</button>
+                  <button onClick={() => setShowAuthModal(true)} className="bg-white border border-[#657F94] text-[#657F94] px-3 py-1.5 rounded-full text-[11px] font-bold hover:bg-[#657F94] hover:text-white flex items-center gap-1 shadow-sm transition-all"><ShieldAlert size={12} />權限管理</button>
+                  <button onClick={() => setShowAddUnitModal(true)} className="bg-white border border-[#657F94] text-[#657F94] px-3 py-1.5 rounded-full text-[11px] font-bold hover:bg-[#657F94] hover:text-white flex items-center gap-1 shadow-sm transition-all"><Plus size={12} />雲端新增</button>
                   <label className="cursor-pointer bg-white border border-amber-600 text-amber-700 px-3 py-1.5 rounded-full text-[11px] font-bold flex items-center gap-1 shadow-sm hover:bg-amber-50 transition-all"><FileText size={12} />匯入發票<input type="file" accept=".xlsx, .xls, .csv" className="hidden" onChange={handleInvoiceFileUpload} /></label>
-                  <label className="cursor-pointer bg-[#8C9B90] text-white px-3 py-1.5 rounded-full text-[11px] font-bold flex items-center gap-1 shadow-sm hover:bg-[#7A8A7E] transition-all"><Upload size={12} /> 匯入 Excel<input type="file" accept=".xlsx, .xls, .csv" className="hidden" onChange={handleFileUpload} /></label>
+                  <label className="cursor-pointer bg-[#657F94] text-white px-3 py-1.5 rounded-full text-[11px] font-bold flex items-center gap-1 shadow-sm hover:bg-[#506A80] transition-all"><Upload size={12} /> 匯入 Excel<input type="file" accept=".xlsx, .xls, .csv" className="hidden" onChange={handleFileUpload} /></label>
                 </>
               )}
               <div className="flex items-center gap-2 pl-3 border-l ml-1">
@@ -1931,8 +1931,8 @@
 
           <div className="max-w-full mx-auto px-6 pt-4 pb-0">
             <div className="flex flex-wrap gap-4 mb-4">
-              <div className="flex w-fit flex-wrap gap-x-6 gap-y-3 bg-white px-5 py-4 rounded-2xl shadow-sm border border-[#D4C9B9]/30">
-                <div className="flex items-center gap-2"><TrendingUp size={16} className="text-[#8C9B90]"/><div className="flex flex-col"><span className="text-[10px] text-gray-400 font-bold">總成交額</span><span className="font-bold text-base">{projectStats.total.toLocaleString()}</span></div></div>
+              <div className="flex w-fit flex-wrap gap-x-6 gap-y-3 bg-white px-5 py-4 rounded-2xl shadow-sm border border-[#8496A5]/30">
+                <div className="flex items-center gap-2"><TrendingUp size={16} className="text-[#657F94]"/><div className="flex flex-col"><span className="text-[10px] text-gray-400 font-bold">總成交額</span><span className="font-bold text-base">{projectStats.total.toLocaleString()}</span></div></div>
                 <div className="flex items-center gap-2 border-l pl-6"><CreditCard size={16} className="text-green-500"/><div className="flex flex-col"><span className="text-[10px] text-gray-400 font-bold">累計實收</span><span className="font-bold text-base text-green-600">{projectStats.received.toLocaleString()}</span></div></div>
                 <div className="flex items-center gap-2 border-l pl-6 relative">
                   <Clock size={16} className="text-orange-400"/><div className="flex flex-col"><span className="text-[10px] text-gray-400 font-bold flex items-center gap-1">未收餘額<button aria-label="查看催收概況" onClick={() => {setShowUnpaidDetails(!showUnpaidDetails); setExpandedStage(null);}} className="text-orange-500 hover:text-orange-700 transition-all active:scale-90" title="查看催收概況"><AlertCircle size={10} /></button></span><span className="font-bold text-base text-orange-500">{projectStats.outstanding.toLocaleString()}</span></div>
@@ -1960,7 +1960,7 @@
                   )}
                 </div>
               </div>
-              <div className="flex w-fit flex-wrap gap-x-6 gap-y-3 bg-white px-5 py-4 rounded-2xl shadow-sm border border-[#D4C9B9]/30">
+              <div className="flex w-fit flex-wrap gap-x-6 gap-y-3 bg-white px-5 py-4 rounded-2xl shadow-sm border border-[#8496A5]/30">
                 <div className="flex items-center gap-2"><Layers size={16} className="text-sky-500"/><div className="flex flex-col"><span className="text-[10px] text-gray-400 font-bold">總戶數</span><span className="font-bold text-base">{projectStats.unitTotal} 戶</span></div></div>
                 <div className="flex items-center gap-2 border-l pl-6"><PieChart size={16} className="text-green-600"/><div className="flex flex-col"><span className="text-[10px] text-gray-400 font-bold">已售戶數</span><span className="font-bold text-base text-green-600">{projectStats.unitSold}</span></div></div>
                 <div className="flex items-center gap-2 border-l pl-6"><CheckCircle2 size={16} className="text-emerald-500"/><div className="flex flex-col"><span className="text-[10px] text-gray-400 font-bold">已交屋戶數</span><span className="font-bold text-base text-emerald-600">{projectStats.unitHandedOver}</span></div></div>
@@ -1977,22 +1977,22 @@
                  if (!s.includes(a) && s.includes(b)) return -1;
                  if (s.includes(a) && s.includes(b)) return s.indexOf(a) - s.indexOf(b);
                  return 0;
-              }).map(t => <button key={t} onClick={() => setActiveTab(t)} className={`px-4 py-2 rounded-t-xl font-bold text-[11px] transition-all whitespace-nowrap ${ activeTab === t ? 'bg-white text-[#8C9B90] border-t-2 border-l border-r border-[#8C9B90] shadow-sm' : 'text-gray-400 hover:text-gray-600' }`}>{t}</button>)}
+              }).map(t => <button key={t} onClick={() => setActiveTab(t)} className={`px-4 py-2 rounded-t-xl font-bold text-[11px] transition-all whitespace-nowrap ${ activeTab === t ? 'bg-white text-[#657F94] border-t-2 border-l border-r border-[#657F94] shadow-sm' : 'text-gray-400 hover:text-gray-600' }`}>{t}</button>)}
             </div>
             
-            <div className="bg-white rounded-xl shadow-sm border overflow-hidden border-[#D4C9B9]/20 relative">
+            <div className="bg-white rounded-xl shadow-sm border overflow-hidden border-[#8496A5]/20 relative">
               <div className="overflow-auto scrollbar-hide" style={{ maxHeight: 'calc(100dvh - 13.75rem)' }}>
                 {activeTab === "待開發票清單" ? (
                   <table className="w-full text-left border-collapse">
-                    <thead className="sticky top-0 z-40 bg-[#F9F9F8] text-[10px] font-bold text-gray-500">
+                    <thead className="sticky top-0 z-40 bg-[#E5EDF3] text-[10px] font-bold text-gray-500">
                       <tr><th className="px-4 py-3 border-b text-center">操作</th><th className="px-4 py-3 border-b text-center">戶別</th><th className="px-4 py-3 border-b text-center">買方</th><th className="px-4 py-3 border-b text-center">收款日期</th><th className="px-4 py-3 border-b text-center">金額</th><th className="px-4 py-3 border-b text-center">來源類型</th></tr>
                     </thead>
                     <tbody className="divide-y text-[11px]">
                       {uninvoicedPayments.length === 0 ? ( <tr><td colSpan="6" className="py-10 text-center text-gray-400 font-bold">目前無待開發票之項目</td></tr> ) : (
                         uninvoicedPayments.map((p, idx) => (
                           <tr key={idx} className="hover:bg-gray-50/50 transition-colors">
-                            <td className="px-4 py-2 text-center border-r"><button onClick={() => openUnitDetails(p.f, p.u, p.buyer)} className="text-[9px] bg-[#D4C9B9] text-white px-2 py-1 rounded-md shadow-sm hover:bg-[#8C9B90]">檢視</button></td>
-                            <td className="px-4 py-2 text-center font-bold text-[#8C9B90]">{p.f}{p.u}</td>
+                            <td className="px-4 py-2 text-center border-r"><button onClick={() => openUnitDetails(p.f, p.u, p.buyer)} className="text-[9px] bg-[#8496A5] text-white px-2 py-1 rounded-md shadow-sm hover:bg-[#657F94]">檢視</button></td>
+                            <td className="px-4 py-2 text-center font-bold text-[#657F94]">{p.f}{p.u}</td>
                             <td className="px-4 py-2 text-center">{p.buyer || '-'}</td>
                             <td className="px-4 py-2 text-center">{renderDateIfApplicable('日期', p.date)}</td>
                             <td className="px-4 py-2 text-right font-bold text-emerald-600">{p.amt.toLocaleString()}</td>
@@ -2004,15 +2004,15 @@
                   </table>
                 ) : activeTab === "已開未收款明細" ? (
                   <table className="w-full text-left border-collapse">
-                    <thead className="sticky top-0 z-40 bg-[#F9F9F8] text-[10px] font-bold text-gray-500">
+                    <thead className="sticky top-0 z-40 bg-[#E5EDF3] text-[10px] font-bold text-gray-500">
                       <tr><th className="px-4 py-3 border-b text-center">操作</th><th className="px-4 py-3 border-b text-center">戶別</th><th className="px-4 py-3 border-b text-center">買方</th><th className="px-4 py-3 border-b text-center">發票日期</th><th className="px-4 py-3 border-b text-center">發票號碼</th><th className="px-4 py-3 border-b text-center">款項類型</th><th className="px-4 py-3 border-b text-right">發票金額</th><th className="px-4 py-3 border-b text-right">已收金額</th><th className="px-4 py-3 border-b text-right">未收餘額</th></tr>
                     </thead>
                     <tbody className="divide-y text-[11px]">
                       {unpaidInvoicesList.length === 0 ? ( <tr><td colSpan="9" className="py-10 text-center text-gray-400 font-bold">目前無已開立但未收齊款項之發票</td></tr> ) : (
                         unpaidInvoicesList.map((p, idx) => (
                           <tr key={idx} className="hover:bg-gray-50/50 transition-colors">
-                            <td className="px-4 py-2 text-center border-r"><button onClick={() => openUnitDetails(p.f, p.u, p.buyer)} className="text-[9px] bg-[#D4C9B9] text-white px-2 py-1 rounded-md shadow-sm hover:bg-[#8C9B90]">檢視</button></td>
-                            <td className="px-4 py-2 text-center font-bold text-[#8C9B90]">{p.f}{p.u}</td>
+                            <td className="px-4 py-2 text-center border-r"><button onClick={() => openUnitDetails(p.f, p.u, p.buyer)} className="text-[9px] bg-[#8496A5] text-white px-2 py-1 rounded-md shadow-sm hover:bg-[#657F94]">檢視</button></td>
+                            <td className="px-4 py-2 text-center font-bold text-[#657F94]">{p.f}{p.u}</td>
                             <td className="px-4 py-2 text-center">{p.buyer || '-'}</td>
                             <td className="px-4 py-2 text-center">{renderDateIfApplicable('日期', p.date)}</td>
                             <td className="px-4 py-2 text-center font-mono font-bold text-sky-700">{p.num}</td>
@@ -2027,7 +2027,7 @@
                   </table>
                 ) : activeTab === "已解約資料" ? (
                   <table className="w-full text-left border-collapse">
-                    <thead className="sticky top-0 z-40 bg-[#F9F9F8] text-[10px] font-bold text-gray-500">
+                    <thead className="sticky top-0 z-40 bg-[#E5EDF3] text-[10px] font-bold text-gray-500">
                       <tr>
                          <th className="px-4 py-3 border-b text-center">操作</th>
                          <th className="px-4 py-3 border-b text-center">解約日期</th>
@@ -2040,7 +2040,7 @@
                         (customData.canceledUnits || []).sort((a,b)=>b.解約時間-a.解約時間).map((p, idx) => (
                           <tr key={idx} className="hover:bg-gray-50/50 transition-colors">
                             <td className="px-4 py-2 text-center border-r">
-                               <button onClick={() => setSelectedUnit({...p, _originalArchiveTime: p.解約時間})} className="text-[9px] bg-[#D4C9B9] text-white px-2 py-1 rounded-md shadow-sm hover:bg-[#8C9B90] mr-1">檢視</button>
+                               <button onClick={() => setSelectedUnit({...p, _originalArchiveTime: p.解約時間})} className="text-[9px] bg-[#8496A5] text-white px-2 py-1 rounded-md shadow-sm hover:bg-[#657F94] mr-1">檢視</button>
                                <button onClick={async () => {
                                    if (!confirm("確定要刪除這筆解約紀錄嗎？")) return;
                                    const newCanceled = (customData.canceledUnits || []).filter(u => u !== p);
@@ -2048,7 +2048,7 @@
                                }} className="text-[9px] bg-red-100 text-red-600 px-2 py-1 rounded-md shadow-sm hover:bg-red-200">刪除</button>
                             </td>
                             <td className="px-4 py-2 text-center text-gray-500">{new Date(p.解約日期).toLocaleDateString()}</td>
-                            <td className="px-4 py-2 text-center font-bold text-[#8C9B90]">{p.基本資料.樓層}{p.基本資料.編號}</td>
+                            <td className="px-4 py-2 text-center font-bold text-[#657F94]">{p.基本資料.樓層}{p.基本資料.編號}</td>
                             <td className="px-4 py-2 text-center">{p.基本資料.買方 || '-'}</td>
                           </tr>
                         ))
@@ -2057,14 +2057,14 @@
                   </table>
                 ) : (
                   <table className="w-full text-left border-collapse">
-                    <thead className="sticky top-0 z-40 bg-[#F9F9F8] text-[10px] font-bold text-gray-500">
+                    <thead className="sticky top-0 z-40 bg-[#E5EDF3] text-[10px] font-bold text-gray-500">
                       <tr>
-                        <th className="px-1 py-3 border-b text-center sticky left-0 bg-[#F9F9F8] z-50 col-action">操作</th>
+                        <th className="px-1 py-3 border-b text-center sticky left-0 bg-[#E5EDF3] z-50 col-action">操作</th>
                         {currentColumns.map((c, i) => {
                           const isSticky = ['樓層', '編號', '買方', '成交總價'].includes(c);
                           const leftPos = c==='樓層'?'44px':c==='編號'?'89px':c==='買方'?'134px':c==='成交總價'?'244px':'0px';
                           const colClass = c==='樓層'?'col-floor':c==='編號'?'col-unit':c==='買方'?'col-buyer':c==='成交總價'?'col-total':'';
-                          return <th key={i} className={`px-2 py-3 border-b text-center ${colClass} ${isSticky ? 'sticky z-50 bg-[#F9F9F8] border-r sticky-shadow' : ''}`} style={isSticky?{left:leftPos}:{}}>{COLUMN_DISPLAY_LABELS[c] || c}</th>
+                          return <th key={i} className={`px-2 py-3 border-b text-center ${colClass} ${isSticky ? 'sticky z-50 bg-[#E5EDF3] border-r sticky-shadow' : ''}`} style={isSticky?{left:leftPos}:{}}>{COLUMN_DISPLAY_LABELS[c] || c}</th>
                         })}
                       </tr>
                     </thead>
@@ -2077,7 +2077,7 @@
                           const isHandoverComplete = activeTab.includes('收款總表') && allUnitsPaymentStatus[unitKey] && Object.keys(allUnitsPaymentStatus[unitKey]).length > 0 && Object.values(allUnitsPaymentStatus[unitKey]).every(st => st.exp === 0 || st.unpaid <= 0) && !!handoverDateStr;
                           return (
                             <tr key={idx} className={`transition-colors ${isHandoverComplete ? 'bg-gray-200 hover:bg-gray-300' : 'hover:bg-gray-50/50'}`}>
-                              {isF && <td rowSpan={span} className={`px-1 py-2 border-r text-center sticky left-0 z-30 sticky-shadow align-middle ${isHandoverComplete ? 'bg-gray-200' : 'bg-white'}`}><button onClick={() => openUnitDetails(uInfo.f, uInfo.u, uInfo.b)} className="text-[9px] bg-[#D4C9B9] text-white px-2 py-1 rounded-md shadow-sm hover:bg-[#8C9B90]">檢視</button></td>}
+                              {isF && <td rowSpan={span} className={`px-1 py-2 border-r text-center sticky left-0 z-30 sticky-shadow align-middle ${isHandoverComplete ? 'bg-gray-200' : 'bg-white'}`}><button onClick={() => openUnitDetails(uInfo.f, uInfo.u, uInfo.b)} className="text-[9px] bg-[#8496A5] text-white px-2 py-1 rounded-md shadow-sm hover:bg-[#657F94]">檢視</button></td>}
                               {currentColumns.map((col, i) => {
                                   const isSticky = ['樓層', '編號', '買方', '成交總價'].includes(col);
                                   const leftPos = col==='樓層'?'44px':col==='編號'?'89px':col==='買方'?'134px':col==='成交總價'?'244px':'0px';
@@ -2088,7 +2088,7 @@
                                   const stageKey = getStageKeyForColumn(col); let isUnpaidStage = false;
                                   if (stageKey && allUnitsPaymentStatus[unitKey]) { const status = allUnitsPaymentStatus[unitKey][stageKey]; if (status && status.exp > 0 && status.unpaid > 0) isUnpaidStage = true; }
                                   return (
-                                    <td key={i} rowSpan={isSticky?span:1} className={`px-2 py-2 border-r ${colClass} ${getAlignClass(col, row[col])} ${isSticky ? `sticky z-20 align-middle ${isHandoverComplete ? 'bg-gray-200' : 'bg-white'}` : ''} ${col==='買方'?'font-bold text-[#8C9B90]':''} ${isUnpaidStage ? 'bg-red-50 text-red-600 font-medium' : ''} whitespace-pre-wrap`} style={isSticky?{left:leftPos}:{}}>
+                                    <td key={i} rowSpan={isSticky?span:1} className={`px-2 py-2 border-r ${colClass} ${getAlignClass(col, row[col])} ${isSticky ? `sticky z-20 align-middle ${isHandoverComplete ? 'bg-gray-200' : 'bg-white'}` : ''} ${col==='買方'?'font-bold text-[#657F94]':''} ${isUnpaidStage ? 'bg-red-50 text-red-600 font-medium' : ''} whitespace-pre-wrap`} style={isSticky?{left:leftPos}:{}}>
                                       <div className={col === '買方' ? "flex flex-col items-center justify-center gap-0.5" : ""}>
                                           <div>
                                             {displayVal}
@@ -2108,14 +2108,14 @@
                       })}
                     </tbody>
                     {!activeTab.includes('客戶') && !activeTab.match(/換約|讓渡/) && (
-                      <tfoot className="sticky bottom-0 z-40 bg-[#F1F3F1] font-bold text-[10px] sticky-bottom-shadow">
+                      <tfoot className="sticky bottom-0 z-40 bg-[#DCE6EE] font-bold text-[10px] sticky-bottom-shadow">
                         <tr>
-                          <td className="px-1 py-3 text-center border-r bg-[#F1F3F1] sticky left-0 z-50">合計</td>
+                          <td className="px-1 py-3 text-center border-r bg-[#DCE6EE] sticky left-0 z-50">合計</td>
                           {currentColumns.map((c, i) => {
                             const isSticky = ['樓層', '編號', '買方', '成交總價'].includes(c);
                             const leftPos = c==='樓層'?'44px':c==='編號'?'89px':c==='買方'?'134px':c==='成交總價'?'244px':'0px';
                             const colClass = c==='買方'?'col-buyer':c==='成交總價'?'col-total':'';
-                            return ( <td key={i} className={`px-2 py-3 border-r ${colClass} text-right ${isSticky ? 'sticky z-50 bg-[#F1F3F1] border-r' : ''}`} style={isSticky ? { left: leftPos } : {}}> {totalsData[c] ? totalsData[c].toLocaleString() : ''} </td> );
+                            return ( <td key={i} className={`px-2 py-3 border-r ${colClass} text-right ${isSticky ? 'sticky z-50 bg-[#DCE6EE] border-r' : ''}`} style={isSticky ? { left: leftPos } : {}}> {totalsData[c] ? totalsData[c].toLocaleString() : ''} </td> );
                           })}
                         </tr>
                       </tfoot>
@@ -2129,9 +2129,9 @@
           {selectedUnit && (
             <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-black/40 backdrop-blur-sm">
               <div className="bg-white rounded-3xl shadow-2xl w-full max-w-5xl max-h-[90vh] flex flex-col overflow-hidden">
-                <div className="flex justify-between items-center px-6 py-4 border-b bg-[#F9F9F8]">
+                <div className="flex justify-between items-center px-6 py-4 border-b bg-[#E5EDF3]">
                   <div className="flex items-center gap-4">
-                    <div className="bg-[#8C9B90] text-white text-2xl font-bold h-14 px-5 rounded-xl flex items-center justify-center shadow-inner">{selectedUnit.基本資料.樓層}{selectedUnit.基本資料.編號}</div>
+                    <div className="bg-[#657F94] text-white text-2xl font-bold h-14 px-5 rounded-xl flex items-center justify-center shadow-inner">{selectedUnit.基本資料.樓層}{selectedUnit.基本資料.編號}</div>
                     <div className="flex flex-col gap-1">
                       <h2 className="text-xl font-bold flex flex-wrap items-center gap-2">
                           {selectedUnit.isArchived && (
@@ -2187,7 +2187,7 @@
                           )}
                           {getDoorplateAddress(selectedUnit.基本資料.樓層, selectedUnit.基本資料.編號) && ( <span className="text-sm font-normal text-gray-500 bg-gray-100 px-2.5 py-0.5 rounded-md border border-gray-200 select-all flex items-center gap-1"> <MapPin size={14}/> {getDoorplateAddress(selectedUnit.基本資料.樓層, selectedUnit.基本資料.編號)} </span> )}
                       </h2>
-                      <p className="text-xs text-[#8C9B90] uppercase font-bold tracking-widest mt-1">{isAdmin ? '管理員模式' : '瀏覽模式'}</p>
+                      <p className="text-xs text-[#657F94] uppercase font-bold tracking-widest mt-1">{isAdmin ? '管理員模式' : '瀏覽模式'}</p>
                     </div>
                   </div>
                   <div className="flex gap-3">
@@ -2202,7 +2202,7 @@
                 </div>
                 <div className="flex-1 overflow-y-auto p-6 bg-gray-50/50 scrollbar-hide space-y-6">
                   <div className="bg-white p-5 rounded-2xl border shadow-sm">
-                    <h3 className="text-sm font-bold text-[#8C9B90] mb-4 border-b pb-2 flex items-center gap-2"><User size={16}/>聯絡資料</h3>
+                    <h3 className="text-sm font-bold text-[#657F94] mb-4 border-b pb-2 flex items-center gap-2"><User size={16}/>聯絡資料</h3>
                     <div className="grid grid-cols-1 md:grid-cols-[minmax(0,0.65fr)_minmax(0,1.35fr)] gap-x-4 gap-y-3">
                       {(() => {
                         const items = { ...selectedUnit.客戶資料 };
@@ -2221,7 +2221,7 @@
                           {(isEditingMode || phone) && <div className="grid grid-cols-[4rem_minmax(0,1fr)] items-start gap-3 text-sm border-b border-gray-50 pb-2 px-3"><span className="text-gray-400">手機</span>{isEditingMode ? <input className="border px-2 py-1 rounded w-full text-left" value={phone} onChange={e=>setSelectedUnit({...selectedUnit, 客戶資料:{...selectedUnit.客戶資料, 手機:e.target.value}})}/> : <span className="font-medium text-left whitespace-pre-wrap break-words">{renderDateIfApplicable('手機', phone)}</span>}</div>}
                           {(isEditingMode || zip || addr) && <div className="grid grid-cols-[4rem_minmax(0,1fr)] items-start gap-3 text-sm border-b border-gray-50 pb-2 px-3"><span className="text-gray-400">通訊地址</span>{isEditingMode ? <div className="grid grid-cols-[5rem_minmax(0,1fr)] gap-1"><input className="border px-2 py-1 rounded text-center" placeholder="郵編" value={zip} onChange={e=>setSelectedUnit({...selectedUnit, 客戶資料:{...selectedUnit.客戶資料, 郵遞區號:e.target.value}})}/><input className="border px-2 py-1 rounded min-w-0" placeholder="地址" value={addr} onChange={e=>setSelectedUnit({...selectedUnit, 客戶資料:{...selectedUnit.客戶資料, 通訊地址:e.target.value}})}/></div> : <span className="font-medium text-left whitespace-pre-wrap break-words">{zip?`[${zip}] `:''}{addr}</span>}</div>}
                           {(isEditingMode || note) && <div className="grid grid-cols-[4rem_minmax(0,1fr)] items-start gap-3 text-sm border-b border-gray-50 pb-2 px-3 md:col-span-2"><span className="text-gray-400">備註</span>{isEditingMode ? <textarea className="border px-2 py-1 rounded w-full min-h-16 resize-y" value={note} onChange={e=>setSelectedUnit({...selectedUnit, 客戶資料:{...selectedUnit.客戶資料, 備註:e.target.value}})}/> : <span className="font-medium text-left whitespace-pre-wrap break-words">{note}</span>}</div>}
-                          <div className="grid grid-cols-[4rem_minmax(0,1fr)] items-center gap-3 text-sm border-b border-gray-50 pb-2 px-3 md:col-span-2"><span className="text-gray-400">通知方式</span><div className="flex flex-wrap gap-x-6 gap-y-2">{[[ '通知Line', 'Line', noticeLine ], [ '通知Mail', 'Mail', noticeMail ], [ '通知紙本', '紙本', noticePaper ]].map(([key,label,checked]) => <label key={key} className={`flex items-center gap-2 ${isEditingMode ? 'cursor-pointer text-gray-700' : 'text-gray-500'}`}><input type="checkbox" checked={checked} disabled={!isEditingMode} onChange={e=>setNotice(key,e.target.checked)} className="w-4 h-4 rounded border-gray-300 text-[#718079] focus:ring-[#8C9B90]"/><span className="font-medium">{label}</span></label>)}</div></div>
+                          <div className="grid grid-cols-[4rem_minmax(0,1fr)] items-center gap-3 text-sm border-b border-gray-50 pb-2 px-3 md:col-span-2"><span className="text-gray-400">通知方式</span><div className="flex flex-wrap gap-x-6 gap-y-2">{[[ '通知Line', 'Line', noticeLine ], [ '通知Mail', 'Mail', noticeMail ], [ '通知紙本', '紙本', noticePaper ]].map(([key,label,checked]) => <label key={key} className={`flex items-center gap-2 ${isEditingMode ? 'cursor-pointer text-gray-700' : 'text-gray-500'}`}><input type="checkbox" checked={checked} disabled={!isEditingMode} onChange={e=>setNotice(key,e.target.checked)} className="w-4 h-4 rounded border-gray-300 text-[#526E85] focus:ring-[#657F94]"/><span className="font-medium">{label}</span></label>)}</div></div>
                           {fields}
                         </>;
                       })()}
@@ -2239,8 +2239,8 @@
                   )}
 
                   <div className="bg-white p-5 rounded-2xl border shadow-sm">
-                    <h3 className="text-sm font-bold text-[#8C9B90] mb-4 border-b pb-2 flex items-center gap-2"><DollarSign size={16}/>財務款項沖銷明細</h3>
-                    <div className="overflow-x-auto"><table className="w-full text-xs border-separate border-spacing-y-1.5"><thead><tr className="text-gray-400 font-bold"><th className="text-center py-2">階段</th><th className="text-center px-2">房屋款</th><th className="text-center px-2">土地款</th><th className="text-center px-2">應付合計</th><th className="text-center px-2 text-[#8C9B90]">已收實沖</th><th className="text-center px-2 text-red-500">尚欠餘額</th><th className="text-center">狀態</th></tr></thead><tbody>
+                    <h3 className="text-sm font-bold text-[#657F94] mb-4 border-b pb-2 flex items-center gap-2"><DollarSign size={16}/>財務款項沖銷明細</h3>
+                    <div className="overflow-x-auto"><table className="w-full text-xs border-separate border-spacing-y-1.5"><thead><tr className="text-gray-400 font-bold"><th className="text-center py-2">階段</th><th className="text-center px-2">房屋款</th><th className="text-center px-2">土地款</th><th className="text-center px-2">應付合計</th><th className="text-center px-2 text-[#657F94]">已收實沖</th><th className="text-center px-2 text-red-500">尚欠餘額</th><th className="text-center">狀態</th></tr></thead><tbody>
                       {(() => {
                         const house = selectedUnit.財務款項.house || {}; const land = selectedUnit.財務款項.land || {};
                         const receipts = (selectedUnit.匯款紀錄 || []).reduce((s,r) => s + (parseFloat(String(r[Object.keys(r).find(k=>k.includes('金額'))||'金額']).replace(/,/g,''))||0), 0);
@@ -2437,7 +2437,7 @@
                   </div>
 
                   <div className="bg-white p-5 rounded-2xl border shadow-sm">
-                    <h3 className="text-sm font-bold text-[#8C9B90] mb-4 border-b pb-2 flex items-center gap-2"><FileText size={16}/>匯款紀錄管理</h3>
+                    <h3 className="text-sm font-bold text-[#657F94] mb-4 border-b pb-2 flex items-center gap-2"><FileText size={16}/>匯款紀錄管理</h3>
                     <table className="w-full text-xs border-separate border-spacing-y-1.5">
                       <thead>
                         <tr><th className={`text-center py-2 bg-emerald-50 text-emerald-700 rounded-l-md font-bold ${!isAdmin && 'w-1/4'}`}>匯款日期</th><th className={`text-center px-2 bg-emerald-50 text-emerald-700 font-bold ${!isAdmin && 'w-1/4'}`}>實收金額</th><th className={`text-center py-2 bg-orange-50 text-orange-700 font-bold ${!isAdmin && 'w-1/4'}`}>發票日期</th><th className={`text-center px-2 bg-orange-50 text-orange-700 rounded-r-md font-bold ${!isAdmin && 'w-1/4'}`}>發票號碼</th>{isAdmin && !selectedUnit.isArchived && <th className="text-center text-gray-400 font-bold w-16">操作</th>}</tr>
@@ -2650,7 +2650,7 @@
           {showAuthModal && isAdmin && (
             <div className="fixed inset-0 z-[100] flex items-center justify-center bg-black/50 backdrop-blur-sm p-4">
               <div className="bg-white p-8 rounded-3xl w-full max-w-2xl shadow-2xl flex flex-col max-h-[90vh]">
-                <div className="flex justify-between items-center border-b pb-4 mb-4"><h3 className="font-bold text-lg text-[#8C9B90] flex items-center gap-2"><ShieldAlert size={20}/>授權名單管理</h3><button aria-label="關閉權限管理" onClick={() => setShowAuthModal(false)} className="text-gray-400 hover:bg-gray-100 p-2 rounded-full transition-all"><X size={20}/></button></div>
+                <div className="flex justify-between items-center border-b pb-4 mb-4"><h3 className="font-bold text-lg text-[#657F94] flex items-center gap-2"><ShieldAlert size={20}/>授權名單管理</h3><button aria-label="關閉權限管理" onClick={() => setShowAuthModal(false)} className="text-gray-400 hover:bg-gray-100 p-2 rounded-full transition-all"><X size={20}/></button></div>
                 <div className="overflow-y-auto scrollbar-hide flex-1">
                     <div className="flex gap-2 mb-6"><input id="new_auth_name" type="text" placeholder="人員名稱" className="border w-1/3 p-2.5 rounded-xl text-sm" /><input id="new_auth_email" type="email" placeholder="Email" className="border flex-1 p-2.5 rounded-xl text-sm" /><button onClick={async () => {
                         const n = document.getElementById('new_auth_name').value.trim(), e = document.getElementById('new_auth_email').value.trim().toLowerCase();
@@ -2660,7 +2660,7 @@
                             document.getElementById('new_auth_name').value = '';
                             document.getElementById('new_auth_email').value = '';
                         }
-                      }} className="bg-[#8C9B90] text-white px-5 py-2.5 rounded-xl text-sm font-bold shadow-md">加入</button>
+                      }} className="bg-[#657F94] text-white px-5 py-2.5 rounded-xl text-sm font-bold shadow-md">加入</button>
                     </div>
                     <div className="space-y-2">
                       {(customData.allowedViewers || []).map((v, i) => {
@@ -2693,10 +2693,10 @@
               </div>
             </div>
           )}
-          {showAddUnitModal && isAdmin && <div className="fixed inset-0 z-[100] flex items-center justify-center bg-black/50 backdrop-blur-sm"><div className="bg-white p-8 rounded-3xl w-96 shadow-2xl"><h3 className="font-bold mb-6 text-lg text-[#8C9B90] border-b pb-2 flex items-center gap-2"><Plus size={20}/>建立新成交戶</h3><div className="space-y-4"><input id="new_u_f" className="border w-full p-3 rounded-xl outline-none" placeholder="樓層" /><input id="new_u_u" className="border w-full p-3 rounded-xl outline-none" placeholder="編號" /></div><div className="flex justify-end gap-3 mt-8"><button onClick={() => setShowAddUnitModal(false)} className="px-5 py-2.5 text-gray-400 text-sm">取消</button><button onClick={async () => {
+          {showAddUnitModal && isAdmin && <div className="fixed inset-0 z-[100] flex items-center justify-center bg-black/50 backdrop-blur-sm"><div className="bg-white p-8 rounded-3xl w-96 shadow-2xl"><h3 className="font-bold mb-6 text-lg text-[#657F94] border-b pb-2 flex items-center gap-2"><Plus size={20}/>建立新成交戶</h3><div className="space-y-4"><input id="new_u_f" className="border w-full p-3 rounded-xl outline-none" placeholder="樓層" /><input id="new_u_u" className="border w-full p-3 rounded-xl outline-none" placeholder="編號" /></div><div className="flex justify-end gap-3 mt-8"><button onClick={() => setShowAddUnitModal(false)} className="px-5 py-2.5 text-gray-400 text-sm">取消</button><button onClick={async () => {
             const f=document.getElementById('new_u_f').value, u=document.getElementById('new_u_u').value;
             if(f&&u){ const k=`${normStr(f)}_${normStr(u)}`; const cu={...(customData.units || {}), [k]:{ 基本資料:{ 樓層:normStr(f), 編號:normStr(u), 買方: "新客戶" }}}; await setDoc(doc(db,'artifacts',appId,'public', 'data','custom',dataIds.additions), {units:cu}, {merge:true}); setShowAddUnitModal(false); }
-          }} className="bg-[#8C9B90] text-white px-8 py-2.5 rounded-xl text-sm font-bold">確認建立</button></div></div></div>}
+          }} className="bg-[#657F94] text-white px-8 py-2.5 rounded-xl text-sm font-bold">確認建立</button></div></div></div>}
           {showBackupModal && isAdmin && (
             <div className="fixed inset-0 z-[100] flex items-center justify-center bg-black/50 backdrop-blur-sm p-4">
               <div className="bg-white p-8 rounded-3xl w-full max-w-md shadow-2xl flex flex-col">
