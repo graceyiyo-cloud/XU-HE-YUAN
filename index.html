@@ -1421,6 +1421,10 @@
         if (combinedData.length === 0) return [];
         const cols = new Set();
         const hiddenColumns = new Set(['通知寄紙本', '發票寄送', '寄', '10F']);
+        if (activeTab.includes('買方資料')) {
+          hiddenColumns.add('戶籍地址');
+          hiddenColumns.add('身分證字號');
+        }
         combinedData.forEach(row => { Object.keys(row).forEach(k => { if(k !== '_isCustom' && !k.startsWith('__EMPTY') && !hiddenColumns.has(k)) cols.add(k); }); });
         return Array.from(cols).sort((a, b) => {
           const idxA = MASTER_COLUMN_ORDER.indexOf(a), idxB = MASTER_COLUMN_ORDER.indexOf(b);
@@ -1429,7 +1433,7 @@
           if (idxB !== -1) return 1;
           return 0;
         });
-      }, [combinedData]);
+      }, [combinedData, activeTab]);
 
       const rowSpans = useMemo(() => {
           const spans = {}; if (!activeTab.includes('收款總表')) return spans;
